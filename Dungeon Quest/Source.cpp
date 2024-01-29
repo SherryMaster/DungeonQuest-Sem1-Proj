@@ -13,9 +13,9 @@ int main() {
 	int coins = 0;
 	int gems = 0;
 	int score = 0;
-	int health = 100;
+	int health = 250;
 	int armor = 0;
-	int max_health = 100;
+	int max_health = 250;
 
 	int level = 1;
 	int xp = 0;
@@ -30,7 +30,7 @@ int main() {
 	bool armor_is_equipped = false;
 
 	float gym_points = 0;
-	int gym_points_to_level = 25;
+	int gym_points_to_level = 50;
 	int gym_level = 0;
 
 
@@ -65,7 +65,8 @@ int main() {
 	// --- ARMOR ---
 
 	string armors[] = { "Leather Armor", "Wooden Armor", "Iron Armor", "Ring Armor", "Steel Armor" };
-	int armor_price[] = { 100, 300, 650, 1200, 2000 };
+	int armor_price_gems[] = { 100, 300, 650, 1200, 2000 };
+	int armor_price_coins[] = { 500, 1500, 3500, 7000, 15000 };
 	int armor_defence[] = { 5, 10, 20, 35, 50 };
 	int armor_unlock_level[] = { 0, 0, 1, 1, 2 };
 	int xp_at_armor_purchase[] = { 5, 15, 35, 60, 125 };
@@ -570,7 +571,7 @@ int main() {
 												cout << i + 1 << ") " << "??????" << "\t - You need to complete "<< armor_unlock_level[i] - dungeons_completed << " more dungeons to unlock" << endl;
 											}
 											else if (armor_purchased[i] == false) {
-												cout << i + 1 << ") " << armors[i] << "\t - " << armor_price[i] << " Gems" << endl;
+												cout << i + 1 << ") " << armors[i] << "\t - " << armor_price_coins[i] << " Coins - " << armor_price_gems[i] << "Gems" << endl;
 											}
 											else {
 												cout << i + 1 << ") " << armors[i] << "\t - Purchased" << endl;
@@ -584,7 +585,7 @@ int main() {
 											choice_invalid = false;
 										}
 										if (insufficient_funds) {
-											cout << "Not enough Gems" << endl;
+											cout << "Insufficient Resources" << endl;
 											insufficient_funds = false;
 										}
 										if (armor_locked) {
@@ -592,7 +593,7 @@ int main() {
 											armor_locked = false;
 										}
 										if (armor_just_purchased) {
-											cout << "You just purchased " << armors[just_purchased_index] << " for " << armor_price[just_purchased_index] << endl;
+											cout << "You just purchased " << armors[just_purchased_index] << " for " << armor_price_coins[just_purchased_index] << "Coins and" << armor_price_gems[just_purchased_index] << endl;
 											armor_just_purchased = false;
 										}
 										cout << "Enter the choice: "; cin >> choice_4;
@@ -606,8 +607,9 @@ int main() {
 													if (armor_unlock_level[i] <= dungeons_completed) {
 
 														// purchase check
-														if (armor_price[i] <= gems) {
-															gems -= armor_price[i];
+														if (armor_price_gems[i] <= gems && armor_price_coins[i] <= coins) {
+															gems -= armor_price_gems[i];
+															coins -= armor_price_coins[i];
 															armor_purchased[i] = true;
 														}
 														else {
@@ -693,7 +695,7 @@ int main() {
 
 											cout << "TOWN - GYM - " << weights[current_weight] << endl;
 											cout << "Do Workout to increase HP" << endl;
-											cout << "Press space to do the workout or press 'Q' to exit." << endl << endl;
+											cout << "Hold Down space to do the workout or press 'Q' to exit." << endl << endl;
 
 											cout << "Current Gym Level: " << gym_level << endl;
 
@@ -837,6 +839,10 @@ int main() {
 										int inv_choice = 0;
 										int potion_choice = 0;
 										bool inventory_potion_selected = false;
+										bool inventory_potion_used = false;
+										int potion_used_index = 0;
+										int health_increase_diff = 0;
+										bool health_already_max = false;
 										
 										while (true) {
 											enemy_hp_perc = (current_enemy_hp * 100) / current_enemy_max_hp;
@@ -909,9 +915,10 @@ int main() {
 												}
 											}
 
-											if (!battle_in_progress && !merchant_wave && !merchant_shop_opened && !inventory_opened) {
+											if (!battle_in_progress && !merchant_wave && !merchant_shop_opened && !inventory_opened && !inventory_potion_selected) {
 												battle_in_progress = true;
 											}
+
 											if (enemy_is_dead) {
 												cout << "ENEMY DEAD!" << endl;
 												cout << "You Got " << enemy_coins[d_index] << " Coins, " << enemy_gems[d_index] << " Gems and score increased by " << enemy_score[d_index] << "!" << endl << endl;
@@ -960,8 +967,13 @@ int main() {
 												cout << "Enter your choice: "; cin >> inv_choice;
 
 												if (inv_choice > 0 && inv_choice <= total_health_potions) {
-													inventory_potion_selected = true;
-													inventory_opened = false;
+													if (health_potion_in_inventory[inv_choice - 1] > 0) {
+														inventory_potion_selected = true;
+														inventory_opened = false;
+													}
+													else {
+														choice_invalid = true;
+													}
 												}
 												else if (inv_choice == 0) {
 													inventory_opened = false;
@@ -971,10 +983,10 @@ int main() {
 												}
 											}
 											else if (inventory_potion_selected) {
-												cout << "|| INVENTORY - " << health_potions[inv_choice] << " ||" << endl << endl;
+												cout << "|| INVENTORY - " << health_potions[inv_choice - 1] << " ||" << endl << endl;
 
-												cout << "Heals " << health_potion_HP[inv_choice] << " HP on use." << endl;
-												cout << "You have " << health_potion_in_inventory[inv_choice] << " of them" << endl << endl;
+												cout << "Heals " << health_potion_HP[inv_choice - 1] << " HP on use." << endl;
+												cout << "You have " << health_potion_in_inventory[inv_choice - 1] << " of them" << endl << endl;
 
 												cout << "1) Use" << endl;
 												cout << "0) Exit" << endl << endl;
@@ -983,8 +995,39 @@ int main() {
 													cout << "Choice not Allowed" << endl;
 													choice_invalid = false;
 												}
-
+												if (inventory_potion_used) {
+													cout << "You used the " << health_potions[inv_choice - 1] << " potion and recovered " << health_potion_HP - health_increase_diff << endl;
+													inventory_potion_used = false;
+												}
+												if (health_already_max) {
+													cout << "You already have max health!" << endl;
+													health_already_max = false;
+												}
 												cout << "Enter the Choice: "; cin >> potion_choice;
+
+												if (potion_choice == 1) {
+													if (health < max_health) {
+														inventory_potion_used = true;
+														health_increase_diff = 0;
+														health += health_potion_HP[inv_choice - 1];
+														if (health > max_health) {
+															health_increase_diff = health - max_health;
+															health = max_health;
+														}
+														health_potion_in_inventory[inv_choice - 1]--;
+														if (health_potion_in_inventory[inv_choice - 1] == 0) {
+															inventory_potion_selected = false;
+															inventory_opened = true;
+														}
+													}
+													else {
+														health_already_max = true;
+													}
+												}
+												else if (potion_choice == 0) {
+													inventory_potion_selected = false;
+													inventory_opened = true;
+												}
 
 											}
 											else if (merchant_wave) {
@@ -1070,6 +1113,7 @@ int main() {
 
 													cout << "Are you sure you want to exit?(press 'y' to confirm or any other key to cancel. )" << endl; ch = _getch();
 													if (ch == 'y') {
+														health = max_health;
 														break;
 													}
 												}
