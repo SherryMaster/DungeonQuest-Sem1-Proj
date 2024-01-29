@@ -13,9 +13,9 @@ int main() {
 	int coins = 0;
 	int gems = 0;
 	int score = 0;
-	int health = 250;
+	int health = 100;
 	int armor = 0;
-	int max_health = 250;
+	int max_health = 100;
 
 	int level = 1;
 	int xp = 0;
