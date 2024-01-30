@@ -10,20 +10,20 @@ int main() {
 	char player_name[50]; int player_name_size;
 
 	// stats variables
-	int coins = 100000;
-	int gems = 100000;
+	int coins = 0;
+	int gems = 0;
 	int score = 0;
 	int health = 100;
 	int armor = 0;
 	int max_health = 100;
 
-	int level = 10;
+	int level = 1;
 	int xp = 0;
 	int xp_to_level = 20;
 
 	int damage_multiplier = 1;
 
-	int dungeons_completed = 4;
+	int dungeons_completed = 0;
 
 	int melee_equipped_index = 0;
 	int armor_equipped_index = 0;
@@ -571,7 +571,7 @@ int main() {
 												cout << i + 1 << ") " << "??????" << "\t - You need to complete "<< armor_unlock_level[i] - dungeons_completed << " more dungeons to unlock" << endl;
 											}
 											else if (armor_purchased[i] == false) {
-												cout << i + 1 << ") " << armors[i] << "\t - " << armor_price_coins[i] << " Coins - " << armor_price_gems[i] << "Gems" << endl;
+												cout << i + 1 << ") " << armors[i] << "\t - " << armor_price_coins[i] << " Coins - " << armor_price_gems[i] << " Gems" << endl;
 											}
 											else {
 												cout << i + 1 << ") " << armors[i] << "\t - Purchased" << endl;
