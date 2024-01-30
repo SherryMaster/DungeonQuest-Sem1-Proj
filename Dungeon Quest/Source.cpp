@@ -10,20 +10,20 @@ int main() {
 	char player_name[50]; int player_name_size;
 
 	// stats variables
-	int coins = 0;
-	int gems = 0;
+	int coins = 100000;
+	int gems = 100000;
 	int score = 0;
 	int health = 100;
 	int armor = 0;
 	int max_health = 100;
 
-	int level = 1;
+	int level = 10;
 	int xp = 0;
 	int xp_to_level = 20;
 
 	int damage_multiplier = 1;
 
-	int dungeons_completed = 0;
+	int dungeons_completed = 4;
 
 	int melee_equipped_index = 0;
 	int armor_equipped_index = 0;
@@ -99,7 +99,7 @@ int main() {
 	// --- ENEMIES ---
 
 	string enemies[] = { "Slime", "Spider", "Skeleton", "Orc", "Bandit"};
-	float enemy_health[] = { 10, 25, 50, 85, 120 };
+	float enemy_health[] = { 15, 45, 100, 185, 260 };
 	int enemy_damage_start[] = { 5, 10, 20, 50, 100 };
 	int enemy_damage_end[] = { 10, 20, 50, 100, 200 };
 	int enemy_defence[] = { 0, 5, 15, 35, 50 };
@@ -115,7 +115,7 @@ int main() {
 	string bosses[] = { "Slime Boss", "Spider Boss", "Skeleton Boss", "Orc Boss", "Bandit Boss" };
 	float boss_health[] = { 100, 250, 500, 1000, 2300 };
 	int boss_damgae_start[] = { 20, 50, 95, 130, 200 };
-	int boss_damgae_end[] = { 50, 100, 150, 200, 250 };
+	int boss_damgae_end[] = { 50, 110, 150, 240, 350 };
 	int boss_defence[] = { 20, 50, 95, 130, 200 };
 	int boss_xp[] = { 300, 750, 1500, 3000, 5500 };
 	int boss_coins[] = { 500, 1000, 2000, 4000, 8000 };
@@ -764,7 +764,11 @@ int main() {
 						cout << "DUNGEON" << endl;
 						for (int i = 0; i < total_dungeons; i++) {
 							if (dungeon_unlock_req[i] - dungeons_completed <= 0) {
-								cout << i + 1 << ") " << dungeons[i] << endl;
+								cout << i + 1 << ") " << dungeons[i];
+								if (dungeon_cleared[i]) {
+									cout << "\t(Cleared)";
+								}
+								cout << endl;
 							}
 							else {
 								cout << i + 1 << ") " << dungeons[i] << " (Locked, Must Clear the previous one first.)" << endl;
@@ -1114,6 +1118,7 @@ int main() {
 													cout << "Are you sure you want to exit?(press 'y' to confirm or any other key to cancel. )" << endl; ch = _getch();
 													if (ch == 'y') {
 														health = max_health;
+														battle_in_progress = false;
 														break;
 													}
 												}
@@ -1136,8 +1141,9 @@ int main() {
 														}
 													}
 												}
-												else if (choice_5 == 2) {
+												else if (choice_5 == 2) { // inventory
 													inventory_opened = true;
+													battle_in_progress = false;
 												}
 												else {
 													choice_invalid = true;
@@ -1224,7 +1230,11 @@ int main() {
 
 								for (int i = 0; i < total_melee_weapons; i++) {
 									if (melee_purchased[i]) {
-										cout << i + 1 << ") " << melee[i] << endl;
+										cout << i + 1 << ") " << melee[i];
+										if (melee_equipped_index == i) {
+											cout << "\t(Equipped)";
+										}
+										cout << endl;
 									}
 								}
 
@@ -1241,63 +1251,68 @@ int main() {
 								if (choice_4 == 0) {
 									break;
 								}
-								else if (choice_4 > 0 && choice_4 <= melee_choices) { // When a weapon is selected
-									bool melee_just_equipped = false;
-									bool already_equipped = false;
-									while (true) {
-										int choice_5;
-										system("cls");
-										cout << player_name << endl << endl;
-										cout << "Coins: " << coins << "\t\t\t\tScore: " << score << endl;
-										cout << "Gems: " << gems << endl;
-										cout << endl << endl;
-										cout << "Health: " << health << "/" << max_health << endl;
-										cout << "Level: " << level << "\t\t\t\tXp:" << xp << "/" << xp_to_level << endl;
-										cout << endl << endl << endl << endl;
+								else if (choice_4 > 0 && choice_4 <= total_melee_weapons) { // When a weapon is selected
+									if (melee_purchased[choice_4 - 1]) {
+										bool melee_just_equipped = false;
+										bool already_equipped = false;
+										while (true) {
+											int choice_5;
+											system("cls");
+											cout << player_name << endl << endl;
+											cout << "Coins: " << coins << "\t\t\t\tScore: " << score << endl;
+											cout << "Gems: " << gems << endl;
+											cout << endl << endl;
+											cout << "Health: " << health << "/" << max_health << endl;
+											cout << "Level: " << level << "\t\t\t\tXp:" << xp << "/" << xp_to_level << endl;
+											cout << endl << endl << endl << endl;
 
-										cout << "INVENTORY - WEAPONS - " << melee[choice_4 - 1] << endl;
+											cout << "INVENTORY - WEAPONS - " << melee[choice_4 - 1] << endl;
 
-										cout << "Damage: " << melee_damage_start[choice_4 - 1] << " - " << melee_damage_end[choice_4 - 1] << endl << endl;
+											cout << "Damage: " << melee_damage_start[choice_4 - 1] << " - " << melee_damage_end[choice_4 - 1] << endl << endl;
 
-										if (choice_4 - 1 == melee_equipped_index) {
-											cout << "1) *Equipped*" << endl;
-										}
-										else {
-											cout << "1) Equip" << endl;
-										}
-										cout << "0) Exit" << endl;
-										cout << endl;
-
-										// input validator
-										if (choice_invalid) {
-											cout << "Choice not allowed" << endl;
-											choice_invalid = false;
-										}
-										if (already_equipped) {
-											cout << "Weapon Already equipped." << endl;
-											already_equipped = false;
-										}
-										if (melee_just_equipped) {
-											cout << "Weapon equipped." << endl;
-											melee_just_equipped = false;
-										}
-										cout << "Enter the choice: "; cin >> choice_5;
-
-										if (choice_5 == 0) {
-											break;
-										}
-										else if (choice_5 == 1) {
 											if (choice_4 - 1 == melee_equipped_index) {
-												already_equipped = true;
+												cout << "1) *Equipped*" << endl;
 											}
 											else {
-												melee_equipped_index = choice_4 - 1;
-												melee_just_equipped = true;
+												cout << "1) Equip" << endl;
+											}
+											cout << "0) Exit" << endl;
+											cout << endl;
+
+											// input validator
+											if (choice_invalid) {
+												cout << "Choice not allowed" << endl;
+												choice_invalid = false;
+											}
+											if (already_equipped) {
+												cout << "Weapon Already equipped." << endl;
+												already_equipped = false;
+											}
+											if (melee_just_equipped) {
+												cout << "Weapon equipped." << endl;
+												melee_just_equipped = false;
+											}
+											cout << "Enter the choice: "; cin >> choice_5;
+
+											if (choice_5 == 0) {
+												break;
+											}
+											else if (choice_5 == 1) {
+												if (choice_4 - 1 == melee_equipped_index) {
+													already_equipped = true;
+												}
+												else {
+													melee_equipped_index = choice_4 - 1;
+													melee_just_equipped = true;
+												}
+											}
+											else {
+												choice_invalid = true;
 											}
 										}
-										else {
-											choice_invalid = true;
-										}
+									}
+									else {
+										choice_invalid = true;
 									}
 								}
 								else {
@@ -1442,11 +1457,9 @@ int main() {
 								
 								for (int i = 0; i < total_armors; i++) {
 									if (armor_purchased[i]) {
+										cout << i + 1 << ") " << armors[i] << endl;
 										if (armor_equipped[i]) {
-											cout << i + 1 << ") " << armors[i] << " (Equipped)" << endl;
-										}
-										else {
-											cout << i + 1 << ") " << armors[i] << endl;
+											cout << "\t(Equipped)";
 										}
 									}
 								}
@@ -1543,8 +1556,8 @@ int main() {
 						break;
 						}
 				else {
-							choice_invalid = true;
-							}
+					choice_invalid = true;
+				}
 			}
 		}
 		else if (choice_1 == 0) { // Exit
