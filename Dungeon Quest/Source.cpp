@@ -56,7 +56,7 @@ int main() {
 	int health_potion_price_in_dungeon[] = { 50, 250, 700, 1800 }; // In coins in dungeon
 	int health_potion_appears_at_dungeon_at_level[] = { 0, 1, 2, 3 };
 	int health_potion_HP[] = { 25, 60, 120, 300 };
-	int health_potion_unlock_level[] = { 1, 3, 5, 7 };
+	int health_potion_unlock_level[] = { 2, 4, 6, 8 };
 	int xp_at_health_potion_purchase[] = { 1, 3, 5, 15 };
 	int health_potion_in_inventory[] = { 0, 0, 0, 0 };
 
@@ -887,8 +887,23 @@ int main() {
 													cout << "MERCHANT HAS ARRIVED, Wanna Buy Something !!!" << endl << endl << endl << endl;
 												}
 												else {
-													cout << "CURRENT ENEMY:\t" << enemies[d_index] << endl;
-													cout << "ATK: " << enemy_damage_start[d_index] << " - " << enemy_damage_end[d_index] << endl << endl;
+													cout << "CURRENT ENEMY:\t";
+													if (boss_wave) {
+														cout << bosses[d_index];
+													}
+													else {
+														cout << enemies[d_index];
+													}
+													cout << endl;
+
+													cout << "ATK: ";
+													if (boss_wave) {
+														cout << boss_damgae_start[d_index] << " - " << boss_damgae_end[d_index];
+													}
+													else {
+														cout << enemy_damage_start[d_index] << " - " << enemy_damage_end[d_index];
+													}
+													cout << endl << endl;
 													cout << "\t\t\tHP: " << current_enemy_hp << "/" << current_enemy_max_hp << endl;
 													cout << "|";
 													for (int i = 0; i < enemy_hp_perc; i++) {
@@ -1055,15 +1070,11 @@ int main() {
 												}
 											}
 											else if (merchant_shop_opened) {
-												int potion_choices = 0;
-												for (int i = 0; i < total_health_potions; i++) {
-													if (health_potion_appears_at_dungeon_at_level[i] > level) {
-														potion_choices++;
-													}
-												}
 
-												for (int i = 0; i < potion_choices; i++) {
-													cout << i + 1 << ") " << health_potions[i] << " - " << health_potion_price_in_dungeon[i] << " coins" << endl;
+												for (int i = 0; i < total_health_potions; i++) {
+													if (health_potion_appears_at_dungeon_at_level[i] <= level) {
+														cout << i + 1 << ") " << health_potions[i] << " - " << health_potion_price_in_dungeon[i] << " coins" << endl;
+													}
 												}
 												cout << "0) Exit" << endl;
 												cout << endl;
@@ -1072,7 +1083,7 @@ int main() {
 													cout << "Choice not allowed" << endl;
 													choice_invalid = false;
 												}
-												if (insufficient_funds){
+												if (insufficient_funds) {
 													cout << "Insufficient funds!" << endl;
 													insufficient_funds = false;
 												}
@@ -1081,16 +1092,21 @@ int main() {
 													potion_purchased_in_dungeon = false;
 												}
 												cout << "Enter your choice: "; cin >> choice_5;
-												if (choice_5 > 0 && choice_5 <= potion_choices) {
+												if (choice_5 > 0 && choice_5 <= total_health_potions) {
 													int choice = choice_5 - 1;
-													if (coins >= health_potion_price_in_dungeon[choice]) {
-														coins -= health_potion_price_in_dungeon[choice];
-														health_potion_in_inventory[0]++;
-														potion_purchased_in_dungeon = true;
-														potion_purchased_in_dungeon_index = choice;
+													if (health_potion_appears_at_dungeon_at_level[choice] <= level) {
+														if (coins >= health_potion_price_in_dungeon[choice]) {
+															coins -= health_potion_price_in_dungeon[choice];
+															health_potion_in_inventory[0]++;
+															potion_purchased_in_dungeon = true;
+															potion_purchased_in_dungeon_index = choice;
+														}
+														else {
+															insufficient_funds = true;
+														}
 													}
 													else {
-														insufficient_funds = true;
+														choice_invalid = true;
 													}
 												}
 												else if (choice_5 == 0) {
